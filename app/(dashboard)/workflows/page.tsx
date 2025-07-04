@@ -3,7 +3,6 @@
 import React, { Suspense } from "react";
 import { GetWorkflowsForUser } from "@/actions/workflows/getWorkflowsForUser";
 import { Skeleton } from "@/components/ui/skeleton";
-import { waitFor } from "@/lib/helper/waitFor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, InboxIcon } from "lucide-react";
 import CreateWorkFlowDialog from "./_components/CreateWorkFlowDialog";
