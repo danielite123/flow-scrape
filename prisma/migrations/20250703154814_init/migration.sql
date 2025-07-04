@@ -3,7 +3,7 @@ CREATE TABLE "Workflow" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "descritpion" TEXT,
+    "description" TEXT,
     "definition" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
