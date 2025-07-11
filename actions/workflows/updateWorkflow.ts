@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { WorkflowStatus } from "@/types/workflows";
 import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 
 export async function UpdateWorkFlow({
   id,
@@ -13,7 +14,7 @@ export async function UpdateWorkFlow({
 }) {
   const { userId } = auth();
 
-  if (userId) {
+  if (!userId) {
     throw new Error("unauthenticated");
   }
 
@@ -30,4 +31,17 @@ export async function UpdateWorkFlow({
   if (workflow.status !== WorkflowStatus.DRAFT) {
     throw new Error("workflow is not a draft");
   }
+
+  await prisma.workflow.update({
+    data: {
+      definition,
+    },
+
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  revalidatePath("/workflows");
 }
