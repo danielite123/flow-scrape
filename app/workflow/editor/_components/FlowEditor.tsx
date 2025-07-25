@@ -21,6 +21,9 @@ import { TaskType } from "@/types/task";
 import NodeComponent from "@/app/workflow/editor/_components/nodes/NodeComponent";
 import { AppNode } from "@/types/appNode";
 import DeletableEdge from "./edges/DeletableEdge";
+import { isValid } from "date-fns";
+import { connect } from "http2";
+import { TaskRegistery } from "@/lib/workflow/tasks/registry";
 
 const nodeTypes = {
   FlowScrapeNode: NodeComponent,
@@ -92,7 +95,43 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
     [setEdges, nodes, updateNodeData]
   );
 
-  console.log("Nodes:", nodes);
+  const isValidConnection = useCallback(
+    (connection: Edge | Connection) => {
+      //No self-connections allowed
+
+      if (connection.source === connection.target) {
+        return false;
+      }
+
+      // Same TaskParam type connections are allowed
+      const source = nodes.find((node) => node.id === connection.source);
+      const target = nodes.find((node) => node.id === connection.target);
+      if (!source || !target) {
+        console.error("Invalid connection: source or target node not found");
+        return false;
+      }
+
+      const sourceTask = TaskRegistery[source.data.type];
+      const targetTask = TaskRegistery[target.data.type];
+
+      const output = sourceTask?.outputs?.find(
+        (o) => o.name === connection.sourceHandle
+      );
+      const input = targetTask?.inputs?.find(
+        (i) => i.name === connection.targetHandle
+      );
+
+      if (input?.type !== output?.type) {
+        console.error("Invalid connection: Mismatched types between");
+        return false;
+      }
+
+      console.log("@DEBUG", { input, output });
+
+      return true;
+    },
+    [nodes]
+  );
 
   return (
     <main className="h-full w-full">
@@ -110,6 +149,7 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
         onDragOver={onDragOver}
         onDrop={onDrop}
         onConnect={onConnect}
+        isValidConnection={isValidConnection}
       >
         <Controls position="top-left" fitViewOptions={fitViewOptions} />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
